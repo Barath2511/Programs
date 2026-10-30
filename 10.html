@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Part B - Colour and Illumination Models</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; background-color: #f4f7f6; }
+    .card { background: #fff; padding: 20px; border-radius: 8px; max-width: 500px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; }
+    canvas { border: 1px solid #333; background-color: #111; display: block; margin: 0 auto 15px auto; border-radius: 4px; }
+    .control { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    label { font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Illumination & Shading Models (Lambertian Diffuse)</h2>
+    
+    <canvas id="lightCanvas" width="400" height="300"></canvas>
+
+    <div class="control">
+      <label>Light Source X Position:</label>
+      <input type="range" id="lightX" min="50" max="350" value="200">
+    </div>
+    <div class="control">
+      <label>Light Source Y Position:</label>
+      <input type="range" id="lightY" min="20" max="250" value="50">
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('lightCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const lightXInput = document.getElementById('lightX');
+    const lightYInput = document.getElementById('lightY');
+
+    const sphereX = 200;
+    const sphereY = 160;
+    const sphereRadius = 80;
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const lightX = parseFloat(lightXInput.value);
+      const lightY = parseFloat(lightYInput.value);
+
+      // Draw sphere pixel by pixel using illumination model (Ambient + Diffuse Lambertian)
+      const imgData = ctx.createImageData(canvas.width, canvas.height);
+      const data = imgData.data;
+
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+          let dx = x - sphereX;
+          let dy = y - sphereY;
+          let distSq = dx * dx + dy * dy;
+
+          if (distSq <= sphereRadius * sphereRadius) {
+            let z = Math.sqrt(sphereRadius * sphereRadius - distSq);
+            
+            // Surface normal vector (nx, ny, nz)
+            let nx = dx / sphereRadius;
+            let ny = dy / sphereRadius;
+            let nz = z / sphereRadius;
+
+            // Light vector from surface point to light source
+            let lx = lightX - x;
+            let ly = lightY - y;
+            let lz = 100 - z; // assume light is at z = 100
+            let lLen = Math.sqrt(lx * lx + ly * ly + lz * lz);
+            lx /= lLen; ly /= lLen; lz /= lLen;
+
+            // Ambient light component
+            let ambient = 0.15;
+
+            // Diffuse (Lambertian) reflection: max(0, N · L)
+            let diffuse = Math.max(0, nx * lx + ny * ly + nz * lz);
+
+            // Total illumination intensity
+            let intensity = Math.min(1.0, ambient + diffuse * 0.85);
+
+            // Base color (Deep Blue)
+            let red = Math.floor(30 * intensity);
+            let green = Math.floor(144 * intensity);
+            let blue = Math.floor(255 * intensity);
+
+            let index = (y * canvas.width + x) * 4;
+            data[index]     = red;
+            data[index + 1] = green;
+            data[index + 2] = blue;
+            data[index + 3] = 255;
+          }
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+
+      // Draw Light Source Indicator Marker
+      ctx.beginPath();
+      ctx.arc(lightX, lightY, 6, 0, Math.PI * 2);
+      ctx.fillStyle = '#f39c12';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    [lightXInput, lightYInput].forEach(elem => elem.addEventListener('input', render));
+
+    render();
+  </script>
+
+</body>
+</html>
