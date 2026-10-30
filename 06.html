@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Part B - Character Generation & Image Operations</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; background-color: #f4f7f6; }
+    .card { background: #fff; padding: 20px; border-radius: 8px; max-width: 520px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; }
+    canvas { border: 1px solid #333; background-color: #fafafa; display: block; margin: 0 auto 15px auto; border-radius: 4px; }
+    .control { margin-bottom: 10px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 5px; }
+    button { padding: 8px 12px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background-color: #2980b9; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Character Generation & Image Operations</h2>
+    
+    <canvas id="imgCanvas" width="400" height="220"></canvas>
+
+    <div class="control">
+      <button onclick="generateBitmapCharacter()">Generate Raster Char</button>
+      <button onclick="applyGrayscale()">Grayscale</button>
+      <button onclick="applyInvert()">Invert Colors</button>
+      <button onclick="resetImage()">Reset Original</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('imgCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Draw initial test pattern (colored shapes)
+    function resetImage() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw background pattern
+      ctx.fillStyle = '#e74c3c';
+      ctx.fillRect(40, 40, 100, 100);
+      
+      ctx.fillStyle = '#2ecc71';
+      ctx.beginPath();
+      ctx.arc(280, 90, 50, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#3498db';
+      ctx.font = 'bold 32px Arial';
+      ctx.fillText('CG LAB', 140, 190);
+    }
+
+    // Character Generation (Bitmap / Raster Character Matrix)
+    function generateBitmapCharacter() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 16px monospace';
+      ctx.fillText("Raster Font Character 'A' Matrix Generation:", 20, 30);
+
+      // 8x8 Bitmap representation of character 'A'
+      const bitmapA = [
+        "00111000",
+        "01000100",
+        "10000010",
+        "10000010",
+        "11111110",
+        "10000010",
+        "10000010",
+        "00000000"
+      ];
+
+      let startX = 140, startY = 60, cellSize = 16;
+      for (let r = 0; r < bitmapA.length; r++) {
+        for (let c = 0; c < bitmapA[r].length; c++) {
+          if (bitmapA[r][c] === '1') {
+            ctx.fillStyle = '#f43f5e';
+          } else {
+            ctx.fillStyle = '#334155';
+          }
+          ctx.fillRect(startX + c * cellSize, startY + r * cellSize, cellSize - 2, cellSize - 2);
+        }
+      }
+    }
+
+    // Image Operation: Grayscale
+    function applyGrayscale() {
+      let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let data = imgData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        let avg = 0.3 * data[i] + 0.59 * data[i+1] + 0.11 * data[i+2];
+        data[i] = avg;     // R
+        data[i+1] = avg;   // G
+        data[i+2] = avg;   // B
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+    // Image Operation: Invert Colors
+    function applyInvert() {
+      let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let data = imgData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] = 255 - data[i];         // R
+        data[i+1] = 255 - data[i+1];     // G
+        data[i+2] = 255 - data[i+2];     // B
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+    // Initial render
+    resetImage();
+  </script>
+
+</body>
+</html>
