@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Part B - 3D Model Display & Viewing Transformations</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; background-color: #f4f7f6; }
+    .card { background: #fff; padding: 20px; border-radius: 8px; max-width: 500px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    canvas { border: 1px solid #333; background-color: #0f172a; display: block; margin: 0 auto 15px auto; border-radius: 4px; }
+    .control { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    label { font-weight: bold; }
+    button { width: 100%; padding: 8px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background-color: #2980b9; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>3D Cube Modeling & Viewing Transformations</h2>
+    
+    <canvas id="canvas3d" width="400" height="300"></canvas>
+
+    <div class="control">
+      <label>Rotate X:</label>
+      <input type="range" id="rotX" min="0" max="360" value="30">
+    </div>
+    <div class="control">
+      <label>Rotate Y:</label>
+      <input type="range" id="rotY" min="0" max="360" value="45">
+    </div>
+    <div class="control">
+      <label>Rotate Z:</label>
+      <input type="range" id="rotZ" min="0" max="360" value="0">
+    </div>
+    <div class="control">
+      <label>Scale / Distance Z:</label>
+      <input type="range" id="distance" min="2" max="10" step="0.2" value="4">
+    </div>
+
+    <button id="resetBtn">Reset View</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas3d');
+    const ctx = canvas.getContext('2d');
+
+    const rotXInput = document.getElementById('rotX');
+    const rotYInput = document.getElementById('rotY');
+    const rotZInput = document.getElementById('rotZ');
+    const distInput = document.getElementById('distance');
+
+    // 3D Cube Vertices (x, y, z)
+    const vertices = [
+      [-1, -1, -1], [ 1, -1, -1], [ 1,  1, -1], [-1,  1, -1],
+      [-1, -1,  1], [ 1, -1,  1], [ 1,  1,  1], [-1,  1,  1]
+    ];
+
+    // Edges connecting vertices
+    const edges = [
+      [0,1], [1,2], [2,3], [3,0], // back face
+      [4,5], [5,6], [6,7], [7,4], // front face
+      [0,4], [1,5], [2,6], [3,7]  // connecting edges
+    ];
+
+    function project(vertex, radX, radY, radZ, fov) {
+      let [x, y, z] = vertex;
+
+      // Rotation X
+      let y1 = y * Math.cos(radX) - z * Math.sin(radX);
+      let z1 = y * Math.sin(radX) + z * Math.cos(radX);
+
+      // Rotation Y
+      let x2 = x * Math.cos(radY) + z1 * Math.sin(radY);
+      let z2 = -x * Math.sin(radY) + z1 * Math.cos(radY);
+
+      // Rotation Z
+      let x3 = x2 * Math.cos(radZ) - y1 * Math.sin(radZ);
+      let y3 = x2 * Math.sin(radZ) + y1 * Math.cos(radZ);
+
+      // 3D Perspective Projection Transformation
+      let zDist = z2 + fov;
+      let scale = 200 / zDist;
+      let xProj = x3 * scale + canvas.width / 2;
+      let yProj = y3 * scale + canvas.height / 2;
+
+      return { x: xProj, y: yProj };
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const radX = parseFloat(rotXInput.value) * Math.PI / 180;
+      const radY = parseFloat(rotYInput.value) * Math.PI / 180;
+      const radZ = parseFloat(rotZInput.value) * Math.PI / 180;
+      const fov = parseFloat(distInput.value);
+
+      const projected = vertices.map(v => project(v, radX, radY, radZ, fov));
+
+      // Draw 3D Edges
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      for (let edge of edges) {
+        let p1 = projected[edge[0]];
+        let p2 = projected[edge[1]];
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+
+      // Draw Vertices
+      ctx.fillStyle = '#f43f5e';
+      for (let p of projected) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    [rotXInput, rotYInput, rotZInput, distInput].forEach(elem => elem.addEventListener('input', render));
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      rotXInput.value = 30;
+      rotYInput.value = 45;
+      rotZInput.value = 0;
+      distInput.value = 4;
+      render();
+    });
+
+    render();
+  </script>
+
+</body>
+</html>
