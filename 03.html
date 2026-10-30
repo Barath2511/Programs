@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Part A - Interactive HTML5 Canvas Game</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f7f6; text-align: center; }
+    .card { background: #fff; padding: 20px; border-radius: 8px; max-width: 500px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    canvas { border: 2px solid #333; background-color: #0f172a; display: block; margin: 10px auto; border-radius: 4px; }
+    .info { display: flex; justify-content: space-around; font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 10px; }
+    button { padding: 8px 16px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    button:hover { background-color: #2980b9; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Interactive HTML5 Catcher Game</h2>
+    <div class="info">
+      <span>Score: <span id="score">0</span></span>
+      <span>Lives: <span id="lives">3</span></span>
+    </div>
+
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    
+    <button onclick="resetGame()">Restart Game</button>
+    <p><small>Use Left / Right Arrow keys or A / D to move the paddle.</small></p>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let player = { x: 160, y: 370, width: 80, height: 12, speed: 6 };
+    let ball = { x: 200, y: 50, radius: 8, dx: 2, dy: 3 };
+    let score = 0;
+    let lives = 3;
+    let gameOver = false;
+
+    let rightPressed = false;
+    let leftPressed = false;
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'd') rightPressed = true;
+      if (e.key === 'ArrowLeft' || e.key === 'a') leftPressed = true;
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'd') rightPressed = false;
+      if (e.key === 'ArrowLeft' || e.key === 'a') leftPressed = false;
+    });
+
+    function update() {
+      if (gameOver) return;
+
+      // Move player paddle
+      if (rightPressed && player.x < canvas.width - player.width) player.x += player.speed;
+      if (leftPressed && player.x > 0) player.x -= player.speed;
+
+      // Move falling object
+      ball.x += ball.dx;
+      ball.y += ball.dy;
+
+      // Wall bounce left/right
+      if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) ball.dx = -ball.dx;
+
+      // Top wall bounce
+      if (ball.y - ball.radius < 0) ball.dy = -ball.dy;
+
+      // Paddle collision detection
+      if (
+        ball.y + ball.radius >= player.y &&
+        ball.x >= player.x &&
+        ball.x <= player.x + player.width &&
+        ball.dy > 0
+      ) {
+        ball.dy = -ball.dy;
+        ball.dy *= 1.05; // Increase speed
+        score += 10;
+        document.getElementById('score').innerText = score;
+      }
+
+      // Missed ball (Bottom collision)
+      if (ball.y - ball.radius > canvas.height) {
+        lives--;
+        document.getElementById('lives').innerText = lives;
+        if (lives === 0) {
+          gameOver = true;
+        } else {
+          // Reset ball position
+          ball.x = Math.random() * (canvas.width - 40) + 20;
+          ball.y = 30;
+          ball.dy = 3;
+        }
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw Paddle
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+
+      // Draw Falling Object
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#f43f5e';
+      ctx.fill();
+      ctx.closePath();
+
+      // Draw Game Over Screen
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 28px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 10);
+        ctx.font = '16px Arial';
+        ctx.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2 + 25);
+      }
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function resetGame() {
+      score = 0;
+      lives = 3;
+      gameOver = false;
+      player.x = 160;
+      ball = { x: 200, y: 50, radius: 8, dx: 2, dy: 3 };
+      document.getElementById('score').innerText = score;
+      document.getElementById('lives').innerText = lives;
+    }
+
+    gameLoop();
+  </script>
+
+</body>
+</html>
