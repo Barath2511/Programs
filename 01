@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Oval Race Track</title>
+</head>
+<body>
+<canvas id="track" width="700" height="450"></canvas>
+
+<script>
+const canvas = document.getElementById("track");
+const ctx = canvas.getContext("2d");
+
+// Background
+ctx.fillStyle = "green";
+ctx.fillRect(0, 0, 700, 450);
+
+// Outer track
+ctx.beginPath();
+ctx.ellipse(350, 225, 280, 160, 0, 0, Math.PI * 2);
+ctx.fillStyle = "#444";
+ctx.fill();
+
+// Inner grass
+ctx.beginPath();
+ctx.ellipse(350, 225, 170, 85, 0, 0, Math.PI * 2);
+ctx.fillStyle = "green";
+ctx.fill();
+
+// Track border
+ctx.lineWidth = 5;
+ctx.strokeStyle = "white";
+ctx.stroke();
+
+// Inner border
+ctx.beginPath();
+ctx.ellipse(350, 225, 170, 85, 0, 0, Math.PI * 2);
+ctx.stroke();
+
+</script>
+</body>
+</html>
