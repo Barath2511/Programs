@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Part A - Sprite-based Animation Program</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f7f6; text-align: center; }
+    .card { background: #fff; padding: 20px; border-radius: 8px; max-width: 550px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    canvas { border: 2px solid #333; background: linear-gradient(to bottom, #87CEEB, #e0f6ff); display: block; margin: 10px auto; border-radius: 4px; }
+    .control { margin-top: 10px; }
+    button { padding: 8px 16px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    button:hover { background-color: #2980b9; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Sprite-Based Animation Program</h2>
+    <canvas id="animCanvas" width="500" height="300"></canvas>
+    <div class="control">
+      <button id="toggleBtn">Pause Animation</button>
+    </div>
+    <p><small>Smooth movement using requestAnimationFrame and procedural sprite frame updates.</small></p>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('animCanvas');
+    const ctx = canvas.getContext('2d');
+    const toggleBtn = document.getElementById('toggleBtn');
+
+    let sprite = {
+      x: -50,
+      y: 200,
+      width: 50,
+      height: 60,
+      speed: 3,
+      legAngle: 0
+    };
+
+    let isRunning = true;
+
+    function drawSprite(s) {
+      ctx.save();
+      ctx.translate(s.x, s.y);
+
+      // Body (Character torso)
+      ctx.fillStyle = '#e74c3c';
+      ctx.fillRect(10, -40, 30, 35);
+
+      // Head
+      ctx.fillStyle = '#f39c12';
+      ctx.beginPath();
+      ctx.arc(25, -55, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eyes
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(28, -60, 6, 6);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(32, -58, 2, 2);
+
+      // Animated Legs (swinging based on legAngle)
+      ctx.strokeStyle = '#2c3e50';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+
+      let legOffset = Math.sin(s.legAngle) * 12;
+
+      // Left leg
+      ctx.beginPath();
+      ctx.moveTo(18, -5);
+      ctx.lineTo(18 + legOffset, 15);
+      ctx.stroke();
+
+      // Right leg
+      ctx.beginPath();
+      ctx.moveTo(32, -5);
+      ctx.lineTo(32 - legOffset, 15);
+      ctx.stroke();
+
+      // Animated Arms
+      ctx.beginPath();
+      ctx.moveTo(10, -30);
+      ctx.lineTo(10 - legOffset, -10);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(40, -30);
+      ctx.lineTo(40 + legOffset, -10);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function animate() {
+      if (!isRunning) return;
+
+      // Clear Canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw Ground
+      ctx.fillStyle = '#27ae60';
+      ctx.fillRect(0, 260, canvas.width, 40);
+
+      // Update sprite position
+      sprite.x += sprite.speed;
+      sprite.legAngle += 0.15;
+
+      // Wrap around screen edges
+      if (sprite.x > canvas.width + 50) {
+        sprite.x = -50;
+      }
+
+      drawSprite(sprite);
+      requestAnimationFrame(animate);
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      isRunning = !isRunning;
+      toggleBtn.innerText = isRunning ? 'Pause Animation' : 'Resume Animation';
+      if (isRunning) animate();
+    });
+
+    animate();
+  </script>
+
+</body>
+</html>
