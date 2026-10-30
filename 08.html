@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Part B - Line & Polygon Computer Graphics Algorithms</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; background-color: #f4f7f6; }
+    .card { background: #fff; padding: 20px; border-radius: 8px; max-width: 500px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    canvas { border: 1px solid #333; background-color: #1e1e1e; display: block; margin: 0 auto 15px auto; }
+    .control { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    button { padding: 8px 12px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background-color: #2980b9; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Computer Graphics: Lines & Polygons</h2>
+    
+    <canvas id="cgCanvas" width="400" height="300"></canvas>
+
+    <div class="control">
+      <button onclick="drawDDA()">DDA Line</button>
+      <button onclick="drawBresenham()">Bresenham Line</button>
+      <button onclick="drawPolygon()">Regular Polygon</button>
+      <button onclick="clearCanvas()" style="background-color: #e74c3c;">Clear</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('cgCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function setPixel(x, y, color = '#38bdf8') {
+      ctx.fillStyle = color;
+      ctx.fillRect(Math.round(x), Math.round(y), 2, 2);
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // DDA Line Drawing Algorithm
+    function drawDDA() {
+      clearCanvas();
+      let x0 = 30, y0 = 40, x1 = 350, y1 = 260;
+      let dx = x1 - x0, dy = y1 - y0;
+      let steps = Math.max(Math.abs(dx), Math.abs(dy));
+      let xInc = dx / steps, yInc = dy / steps;
+      let x = x0, y = y0;
+
+      for (let i = 0; i <= steps; i++) {
+        setPixel(x, y, '#22c55e');
+        x += xInc;
+        y += yInc;
+      }
+    }
+
+    // Bresenham's Line Drawing Algorithm
+    function drawBresenham() {
+      clearCanvas();
+      let x0 = 40, y0 = 250, x1 = 360, y1 = 50;
+      let dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
+      let sx = (x0 < x1) ? 1 : -1;
+      let sy = (y0 < y1) ? 1 : -1;
+      let err = dx - dy;
+
+      while (true) {
+        setPixel(x0, y0, '#f97316');
+        if (x0 === x1 && y0 === y1) break;
+        let e2 = 2 * err;
+        if (e2 > -dy) { err -= dy; x0 += sx; }
+        if (e2 < dx) { err += dx; y0 += sy; }
+      }
+    }
+
+    // Polygon Rendering Algorithm
+    function drawPolygon() {
+      clearCanvas();
+      const sides = 6, radius = 80, cx = 200, cy = 150;
+      const points = [];
+
+      for (let i = 0; i < sides; i++) {
+        let angle = (i * 2 * Math.PI) / sides;
+        points.push({
+          x: cx + radius * Math.cos(angle),
+          y: cy + radius * Math.sin(angle)
+        });
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < sides; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = '#a855f7';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(168, 85, 247, 0.2)';
+      ctx.fill();
+    }
+
+    // Initial view
+    drawPolygon();
+  </script>
+
+</body>
+</html>
