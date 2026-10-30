@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Part B - 2D Model & Viewing Transformations</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; background-color: #f4f7f6; }
+    .card { background: #fff; padding: 20px; border-radius: 8px; max-width: 450px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    canvas { border: 1px solid #333; background-color: #fafafa; display: block; margin: 0 auto 15px auto; }
+    .control { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    label { font-weight: bold; }
+    button { width: 100%; padding: 8px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background-color: #2980b9; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>2D Model Transformations</h2>
+    
+    <canvas id="myCanvas" width="400" height="300"></canvas>
+
+    <div class="control">
+      <label>Translate X:</label>
+      <input type="range" id="tx" min="-150" max="150" value="0">
+    </div>
+    <div class="control">
+      <label>Translate Y:</label>
+      <input type="range" id="ty" min="-100" max="100" value="0">
+    </div>
+    <div class="control">
+      <label>Rotate (Deg):</label>
+      <input type="range" id="rotate" min="0" max="360" value="0">
+    </div>
+    <div class="control">
+      <label>Scale:</label>
+      <input type="range" id="scale" min="0.2" max="2" step="0.1" value="1">
+    </div>
+
+    <button id="resetBtn">Reset</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const txInput = document.getElementById('tx');
+    const tyInput = document.getElementById('ty');
+    const rotInput = document.getElementById('rotate');
+    const scaleInput = document.getElementById('scale');
+
+    function drawModel() {
+      // Base House
+      ctx.fillStyle = '#e74c3c';
+      ctx.fillRect(-40, 0, 80, 60);
+
+      // Roof
+      ctx.beginPath();
+      ctx.moveTo(-50, 0);
+      ctx.lineTo(0, -40);
+      ctx.lineTo(50, 0);
+      ctx.closePath();
+      ctx.fillStyle = '#f39c12';
+      ctx.fill();
+
+      // Door
+      ctx.fillStyle = '#2c3e50';
+      ctx.fillRect(-10, 25, 20, 35);
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+
+      const tx = parseFloat(txInput.value);
+      const ty = parseFloat(tyInput.value);
+      const angle = parseFloat(rotInput.value) * (Math.PI / 180);
+      const scale = parseFloat(scaleInput.value);
+
+      // Viewing transformations centered on canvas
+      ctx.translate(canvas.width / 2 + tx, canvas.height / 2 + ty);
+      ctx.rotate(angle);
+      ctx.scale(scale, scale);
+
+      drawModel();
+      ctx.restore();
+    }
+
+    [txInput, tyInput, rotInput, scaleInput].forEach(elem => elem.addEventListener('input', render));
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      txInput.value = 0;
+      tyInput.value = 0;
+      rotInput.value = 0;
+      scaleInput.value = 1;
+      render();
+    });
+
+    render();
+  </script>
+
+</body>
+  </html>
+  
