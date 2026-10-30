@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Part A - Synchronize HTML5 Content with Video Playback</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; background-color: #f4f7f6; }
+    .card { background: #fff; padding: 20px; border-radius: 8px; max-width: 600px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    video { width: 100%; border-radius: 6px; }
+    .sync-box { margin-top: 15px; padding: 15px; border-left: 4px solid #3498db; background-color: #eef2f5; border-radius: 4px; }
+    .sync-box h3 { margin-top: 0; color: #2c3e50; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Video Playback & HTML Content Synchronization</h2>
+    
+    <!-- Canvas generated HTML5 video stream (no external media file required) -->
+    <canvas id="videoCanvas" width="560" height="315" style="display:none;"></canvas>
+    <video id="myVideo" controls width="100%" autoplay loop muted></video>
+
+    <div class="sync-box">
+      <h3 id="captionTitle">Intro Stage</h3>
+      <p id="captionText">Video initializing...</p>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('videoCanvas');
+    const ctx = canvas.getContext('2d');
+    const video = document.getElementById('myVideo');
+    const captionTitle = document.getElementById('captionTitle');
+    const captionText = document.getElementById('captionText');
+
+    // Create a dynamic video stream using Canvas so no external file is required
+    let sec = 0;
+    setInterval(() => {
+      sec = (sec + 0.1) % 20;
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 36px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Simulated Video Time: ${sec.toFixed(1)}s`, canvas.width/2, canvas.height/2);
+    }, 100);
+
+    const stream = canvas.captureStream(30);
+    video.srcObject = stream;
+
+    // Synchronize HTML elements with multimedia playback time
+    video.addEventListener('timeupdate', () => {
+      const currentTime = video.currentTime % 20; // 20-second loop
+
+      if (currentTime < 5) {
+        captionTitle.innerText = "Section 1: Introduction";
+        captionText.innerText = "Welcome to the multimedia synchronization demo.";
+      } else if (currentTime < 10) {
+        captionTitle.innerText = "Section 2: Key Concepts";
+        captionText.innerText = "HTML5 media events allow real-time UI synchronization.";
+      } else if (currentTime < 15) {
+        captionTitle.innerText = "Section 3: Interactive Features";
+        captionText.innerText = "Dynamic updates adjust layout without stopping playback.";
+      } else {
+        captionTitle.innerText = "Section 4: Summary";
+        captionText.innerText = "Video sequence concluding and dynamic loop restarting.";
+      }
+    });
+  </script>
+
+</body>
+</html>
